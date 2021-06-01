@@ -5,11 +5,11 @@ using UnityEngine;
 public class ChildSlot : MonoBehaviour
 {
     public GroupManager groupManager;
-    public Soldier soldier;
+    public SoldierAgent soldier;
     public bool isEmpty = true;
 
 
-    public void Init(GroupManager groupManager, Transform parent,Vector3 createPos,string name)
+    public void Init(GroupManager groupManager, Transform parent, Vector3 createPos, string name)
     {
         this.groupManager = groupManager;
         soldier = null;
@@ -18,8 +18,8 @@ public class ChildSlot : MonoBehaviour
         isEmpty = true;
         gameObject.name = name;
     }
-    
-    public void Mount(Soldier soldier)
+
+    public void Mount(SoldierAgent soldier)
     {
         this.soldier = soldier;
         isEmpty = false;
@@ -32,6 +32,6 @@ public class ChildSlot : MonoBehaviour
         isEmpty = true;
         soldier = null;
     }
-    
-    
+
+
 }
