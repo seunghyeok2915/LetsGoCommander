@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using System.Linq;
 
 
 public class SoldierAgent : LivingEntity
@@ -14,61 +15,46 @@ public class SoldierAgent : LivingEntity
     public float damage;
     public LayerMask enemyLayerMask;
     public GameObject bullet;
-    private bool bIsAttackRange;
+    public bool bIsAttackRange;
+    public Transform firePos;
 
     private ChildSlot childSlot;
     private Animator anim;
     private NavMeshAgent navAgent;
 
-
-    private SoldierState currentState;
-    private enum SoldierState
-    {
-        White,
-        Idle,
-        Move,
-        Attack
-    }
-
-
     Vector3 dir = Vector3.zero;
-    Vector3 target = Vector3.zero;
 
     private float nextTimeToAttack;
+    private LivingEntity targetEntity;
 
     private void Start()
     {
+        onDeath.AddListener(OnDie);
         anim = GetComponentInChildren<Animator>();
         navAgent = GetComponent<NavMeshAgent>();
-        currentState = SoldierState.White;
+    }
+
+    private void OnDie()
+    {
+        childSlot.DisMount();
     }
 
     private void Update()
     {
-        if (Physics.CheckSphere(transform.position, attackRange, enemyLayerMask))
+        dir = GroupMovement.JoyStickDirection;
+        if (childSlot.groupManager.enemys.Count > 0)
         {
-            currentState = SoldierState.Attack;
+            targetEntity = childSlot.groupManager.enemys.OrderBy(x => (transform.position - x.transform.position).sqrMagnitude).Where(x => (transform.position - x.transform.position).sqrMagnitude < attackRange * attackRange).FirstOrDefault();
         }
-        else
-        {
-            currentState = SoldierState.Idle;
-        }
+        else targetEntity = null;
 
-        switch (currentState)
-        {
-            case SoldierState.White: // 아무것도안함
-                break;
-            case SoldierState.Idle:
-                break;
-            case SoldierState.Move:
-                Move();
-                break;
-            case SoldierState.Attack:
-                Move();
-                break;
-            default:
-                break;
-        }
+        bIsAttackRange = targetEntity != null ? true : false;
+        anim.SetBool("isShooting", bIsAttackRange);
+
+        if (bIsAttackRange)
+            Attack();
+
+        Move(childSlot.transform.position);
 
     }
 
@@ -77,40 +63,52 @@ public class SoldierAgent : LivingEntity
         this.childSlot = childSlot;
 
         transform.parent = childSlot.transform;
-        currentState = SoldierState.Idle;
     }
 
     public void DisMountParent()
     {
         childSlot = null;
-        currentState = SoldierState.White;
 
         gameObject.SetActive(false);
     }
 
-    public void Move()
+    public void Move(Vector3 target)
     {
-        dir = childSlot.groupManager.groupMovement.dir;
-        target = childSlot.transform.position;
+        var distance = Vector3.Distance(transform.position, target);
 
-        target.y = transform.position.y;
-        Vector3 v = target - transform.position;
-
-        if (v.sqrMagnitude >= 0.1f)
+        if (distance >= 1f) //떨어졌을때 
         {
             navAgent.SetDestination(target);
             navAgent.speed = movementSpeed;
 
             anim.SetFloat("moveSpeed", 1);
 
-            Rotate(target);
+            if (!bIsAttackRange)
+                Rotate(target);
+        }
+        else //붙었을때
+        {
+            navAgent.speed = 0;
+            anim.SetFloat("moveSpeed", dir.magnitude);
+
+            if (!bIsAttackRange)
+                Rotate(transform.position + dir);
+        }
+    }
+
+    public void Attack()
+    {
+        Rotate(targetEntity.transform.position);
+        if (nextTimeToAttack < 0)
+        {
+            //var bulletCs = Instantiate(bullet, transform.position, Quaternion.identity).GetComponent<Bullet>();
+            var bulletCs = PoolManager.GetItem<Bullet>();
+            bulletCs.InitBullet(firePos, targetEntity.transform, damage, BulletFrom.Player);
+            nextTimeToAttack = attackDelay;
         }
         else
         {
-            navAgent.speed = 0;
-            anim.SetFloat("moveSpeed", childSlot.groupManager.groupMovement.moveSpeedParameter);
-
-            Rotate(transform.position + dir);
+            nextTimeToAttack -= Time.deltaTime;
         }
     }
 
@@ -127,19 +125,5 @@ public class SoldierAgent : LivingEntity
             Time.deltaTime * rotateSpeed);
 
         transform.eulerAngles = new Vector3(0, rot, 0);
-    }
-
-    public void Attack()
-    {
-        if (nextTimeToAttack < 0)
-        {
-            //SHoot;
-            Debug.Log("SHOOT");
-            nextTimeToAttack = attackDelay;
-        }
-        else
-        {
-            nextTimeToAttack -= Time.deltaTime;
-        }
     }
 }
