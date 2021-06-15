@@ -11,9 +11,9 @@ GameObject:
   - component: {fileID: 7719105662723782175}
   - component: {fileID: 7719105662723782174}
   - component: {fileID: 7719105662723782169}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: PlayerGroup
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -44,15 +44,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb47a31f82e57ea469b1491aec5c506b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  groupMovement: {fileID: 7719105662723782169}
-  center: {fileID: 6251005919195243524, guid: 5dbbe1e825122a040a8e5ffa8256f564, type: 3}
-  findEnemyRange: 50
-  enemys: []
-  enemyLayer:
-    serializedVersion: 2
-    m_Bits: 512
   shape: 10
   range: 1.5
+  findEnemyRange: 50
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 2048
+  enemys: []
+  groupMovement: {fileID: 7719105662723782169}
 --- !u!114 &7719105662723782169
 MonoBehaviour:
   m_ObjectHideFlags: 0
