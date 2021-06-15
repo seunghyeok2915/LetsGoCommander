@@ -1,0 +1,26 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class WhitePlayer : MonoBehaviour
+{
+    public int index = 1;
+    private GroupManager groupManager;
+
+    private void Start()
+    {
+        groupManager = FindObjectOfType<GroupManager>();
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            var effect = PoolManager.GetItem<MagicPoofEffect>();
+
+            effect.Init(new Vector3(transform.position.x, transform.position.y + 1.5f, transform.position.z), 0.5f);
+            groupManager.MakeSoldier(index, transform);
+            gameObject.SetActive(false);
+        }
+    }
+}

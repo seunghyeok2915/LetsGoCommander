@@ -4,8 +4,9 @@
 TagManager:
   serializedVersion: 2
   tags:
+  - Shootable
   - Enemy
-  - WhiteSolider
+  - FxTemporaire
   layers:
   - Default
   - TransparentFX
@@ -15,12 +16,12 @@ TagManager:
   - UI
   - 
   - 
-  - Player
+  - Lighting
+  - Ground
+  - Postprocessing
   - Enemy
-  - 
-  - 
-  - 
-  - 
+  - Player
+  - WhitePlayer
   - 
   - 
   - 
@@ -40,6 +41,9 @@ TagManager:
   - 
   - 
   m_SortingLayers:
+  - name: Fire
+    uniqueID: 3804908061
+    locked: 0
   - name: Default
     uniqueID: 0
     locked: 0

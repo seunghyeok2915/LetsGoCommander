@@ -27,6 +27,7 @@ public class PoolManager : MonoBehaviour
         for (int i = 0; i < poolClassList.Length; i++)
         {
             string name = poolClassList[i];
+            Debug.Log(name);
             Type T = Type.GetType(name);
 
             MethodInfo createMethod = typeof(PoolManager).GetMethod("CreatePool", BindingFlags.Public | BindingFlags.Instance);

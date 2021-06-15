@@ -14,7 +14,9 @@ public class Bullet : MonoBehaviour
     private float bulletDamage;
     private BulletFrom bulletFrom;
 
-    public void InitBullet(Transform startPos, Transform target, float bulletDamage, BulletFrom bulletFrom)
+    private float lifeTime;
+
+    public void InitBullet(Transform startPos, Transform target, float bulletDamage, BulletFrom bulletFrom, float lifeTime = 1)
     {
         transform.position = startPos.position;
         var targetTrm = target.position;
@@ -24,13 +26,23 @@ public class Bullet : MonoBehaviour
         this.bulletFrom = bulletFrom;
 
         transform.LookAt(targetTrm);
-        Invoke("SetActiveFalse", 2.0f);
+        this.lifeTime = lifeTime;
     }
 
-    void SetActiveFalse() => gameObject.SetActive(false);
+    void SetActiveFalse()
+    {
+        gameObject.SetActive(false);
+        lifeTime = 0;
+    }
 
     private void Update()
     {
+        if (lifeTime > 0)
+        {
+            lifeTime -= Time.deltaTime;
+            if (lifeTime <= 0)
+                SetActiveFalse();
+        }
         transform.position += transform.forward * (bulletSpeed * Time.deltaTime);
     }
 
@@ -44,7 +56,14 @@ public class Bullet : MonoBehaviour
                 case BulletFrom.Player:
                     if (livingEntity.CompareTag("Enemy"))
                     {
-                        livingEntity.OnDamage(bulletDamage);
+                        if (!livingEntity.dead)
+                        {
+                            livingEntity.OnDamage(bulletDamage);
+                            var bloodEffect = PoolManager.GetItem<BloodStainEffect>();
+                            bloodEffect.Init(transform.position, 0.3f);
+                            bloodEffect.transform.eulerAngles = new Vector3(0, Random.Range(0, 360), 0);
+                            SetActiveFalse();
+                        }
                     }
                     break;
                 case BulletFrom.Enemy:
@@ -53,8 +72,6 @@ public class Bullet : MonoBehaviour
                     Debug.LogError("Unknown Type");
                     break;
             }
-
-            gameObject.SetActive(false);
         }
     }
 }

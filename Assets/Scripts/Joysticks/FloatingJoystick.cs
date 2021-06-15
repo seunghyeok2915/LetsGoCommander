@@ -5,6 +5,8 @@ using UnityEngine.EventSystems;
 
 public class FloatingJoystick : Joystick
 {
+    public GameObject handAnimation;
+
     protected override void Start()
     {
         base.Start();
@@ -13,6 +15,7 @@ public class FloatingJoystick : Joystick
 
     public override void OnPointerDown(PointerEventData eventData)
     {
+        handAnimation.SetActive(false);
         background.anchoredPosition = ScreenPointToAnchoredPosition(eventData.position);
         background.gameObject.SetActive(true);
         base.OnPointerDown(eventData);
