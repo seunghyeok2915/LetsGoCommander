@@ -16,6 +16,8 @@ public class WhitePlayer : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
+            SoundManager.instance.PlaySound(3);
+
             var effect = PoolManager.GetItem<MagicPoofEffect>();
 
             effect.Init(new Vector3(transform.position.x, transform.position.y + 1.5f, transform.position.z), 0.5f);

@@ -64,13 +64,11 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        var map = Instantiate(mapList[currentStage - 1], transform.position, Quaternion.identity, transform);
-        mapData = map;
-
-        mapManager._mapPrefab = map.gameObject;
-        mapManager.GenerateNavmesh();
 
         bPlayingGame = false;
+        CreateMap();
+        mapData.GetEnemyList();
+        mapData.EnemyBalance(currentStage);
 
         UIInit();
         SpawnSoldiers();
@@ -78,6 +76,14 @@ public class GameManager : MonoBehaviour
         CameraManager.transposer.m_FollowOffset = new Vector3(0, 7, -7.33f);
     }
 
+    void CreateMap()
+    {
+        var map = Instantiate(mapList[currentStage - 1], transform.position, Quaternion.identity, transform);
+        mapData = map;
+
+        mapManager._mapPrefab = map.gameObject;
+        mapManager.GenerateNavmesh();
+    }
     void SpawnSoldiers()
     {
         groupManager.transform.position = mapData.playerSpawnPos.position;
@@ -100,7 +106,15 @@ public class GameManager : MonoBehaviour
         {
             groupManager.MakeSoldier(3);
         }
+        SetSoldiers();
+    }
 
+    void SetSoldiers()
+    {
+        foreach (var item in groupManager.soldierAgents)
+        {
+            item.InitStatus(damageLevel, healthLevel);
+        }
     }
 
     public static void LoadScene(string sceneName) // 로드 씬
@@ -138,7 +152,6 @@ public class GameManager : MonoBehaviour
         StartCoroutine(CheckGameEnd());
 
         bPlayingGame = true;
-        mapData.GetEnemyList();
         while (mapData.enemyList.Count > 0)
         {
 
@@ -221,6 +234,8 @@ public class GameManager : MonoBehaviour
                 case UpgradeEnum.SQUAD:
                     squadLevel++;
                     uiHome.SetUpgradeBtn(squadLevel, GetUpgradeCost(UpgradeEnum.SQUAD), UpgradeEnum.SQUAD);
+
+                    groupManager.MakeSoldier(1);
                     break;
                 case UpgradeEnum.DAMAGE:
                     damageLevel++;
@@ -234,6 +249,8 @@ public class GameManager : MonoBehaviour
                     Debug.LogError("Unknown Type");
                     break;
             }
+            SetSoldiers();
+            SaveData();
             return true;
         }
         else return false;
@@ -245,13 +262,13 @@ public class GameManager : MonoBehaviour
         switch (upgradeEnum)
         {
             case UpgradeEnum.SQUAD:
-                cost = squadLevel * 2;
+                cost = (int)(squadLevel * Mathf.Pow(1.07f, squadLevel - 1));
                 break;
             case UpgradeEnum.DAMAGE:
-                cost = damageLevel * 2;
+                cost = (int)(damageLevel * Mathf.Pow(1.07f, damageLevel - 1));
                 break;
             case UpgradeEnum.HEALTH:
-                cost = healthLevel * 2;
+                cost = (int)(healthLevel * Mathf.Pow(1.07f, healthLevel - 1));
                 break;
             default:
                 Debug.LogError("Unknown Type");

@@ -31,8 +31,13 @@ public class SoldierAgent : LivingEntity
     private SkinnedMeshRenderer[] materials;
     private CapsuleCollider capsuleCollider;
 
+    private float damageTemp;
+    private float healthTemp;
+
     private void Awake()
     {
+        damageTemp = damage;
+        healthTemp = maxHp;
         capsuleCollider = GetComponentInChildren<CapsuleCollider>();
         materials = GetComponentsInChildren<SkinnedMeshRenderer>();
     }
@@ -51,14 +56,25 @@ public class SoldierAgent : LivingEntity
 
     private void Start()
     {
+
+
         onDeath.AddListener(OnDie);
         anim = GetComponentInChildren<Animator>();
         navAgent = GetComponent<NavMeshAgent>();
     }
 
+
+    public void InitStatus(int damageLevel, int healthLevel)
+    {
+        damage = damageTemp * Mathf.Pow(1.07f, damageLevel - 1);
+        maxHp = healthTemp * Mathf.Pow(1.07f, healthLevel - 1);
+        base.OnEnable();
+    }
+
     private void Update()
     {
         if (dead) return;
+
         dir = GroupMovement.JoyStickDirection;
         if (childSlot.groupManager.enemys.Count > 0)
         {
@@ -85,7 +101,7 @@ public class SoldierAgent : LivingEntity
     {
         var distance = Vector3.Distance(transform.position, target);
 
-        if (distance >= 1f) //떨어졌을때 
+        if (distance >= 1.1f) //떨어졌을때 
         {
             navAgent.SetDestination(target);
             navAgent.speed = movementSpeed;
@@ -94,6 +110,11 @@ public class SoldierAgent : LivingEntity
 
             if (!bIsAttackRange)
                 Rotate(target);
+
+            if (distance >= 10f) //떨어졌을때 
+            {
+                transform.position = target;
+            }
         }
         else //붙었을때
         {
@@ -103,6 +124,8 @@ public class SoldierAgent : LivingEntity
             if (!bIsAttackRange)
                 Rotate(transform.position + dir);
         }
+
+
     }
 
     public void Attack()
@@ -111,6 +134,8 @@ public class SoldierAgent : LivingEntity
 
         if (nextTimeToAttack < 0 && GameManager.bPlayingGame)
         {
+            SoundManager.instance.PlaySound(2);
+
             //var bulletCs = Instantiate(bullet, transform.position, Quaternion.identity).GetComponent<Bullet>();
             var bulletCs = PoolManager.GetItem<Bullet>();
             bulletCs.InitBullet(firePos, targetEntity.transform, damage, BulletFrom.Player);

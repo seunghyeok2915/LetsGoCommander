@@ -23,12 +23,12 @@ public class UIEndPage : MonoBehaviour
 
         if (victoryStatus)
         {
-            getGold = gameManager.currentStage * 2;
+            getGold = (int)(gameManager.currentStage * Mathf.Pow(1.07f, gameManager.currentStage - 1));
             ActiveResult(true);
         }
         else
         {
-            getGold = gameManager.currentStage;
+            getGold = (int)(gameManager.currentStage * Mathf.Pow(1.07f, gameManager.currentStage - 1)) / 2;
             ActiveResult(false);
         }
 

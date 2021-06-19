@@ -17,10 +17,11 @@ public class GroupManager : MonoBehaviour
     private int layer = 1; //레이어 변수
     private int childSlotCount = -1; //자식 슬롯 변수
 
-    private List<ChildSlot> childSlots = new List<ChildSlot>(); //자식 슬롯 리스트
+    public List<SoldierAgent> soldierAgents = new List<SoldierAgent>(); //병사들리스트
     public GroupMovement groupMovement;
     public int currentSoldierCount = 0;
 
+    private List<ChildSlot> childSlots = new List<ChildSlot>(); //자식 슬롯 리스트
 
     private void Start()
     {
@@ -90,7 +91,7 @@ public class GroupManager : MonoBehaviour
         PutChild(temp);
     }
 
-    public void MakeSoldier(int index)
+    public SoldierAgent MakeSoldier(int index)
     {
         SoldierAgent temp = null;
         switch (index)
@@ -108,9 +109,10 @@ public class GroupManager : MonoBehaviour
                 Debug.LogError("알수없는 타입");
                 break;
         }
-
         temp.transform.position = transform.position;
+        Debug.Log(transform.position);
         PutChild(temp);
+        return temp;
     }
 
     Vector3 GetMakePoint()
@@ -153,6 +155,7 @@ public class GroupManager : MonoBehaviour
             {
                 childSlot.Mount(soldier);
                 currentSoldierCount++;
+                soldierAgents.Add(soldier);
                 return;
             }
         }

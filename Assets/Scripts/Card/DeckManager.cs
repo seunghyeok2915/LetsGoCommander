@@ -16,16 +16,14 @@ public class DeckManager : MonoBehaviour
         // Initial Deck 에서 player Deck 으로 Clone
         playerDeck = initialDeck;
 
-        playerDeck.Shuffle();
         Draw();
-        playerDeck.Shuffle();
         Draw();
-        playerDeck.Shuffle();
         Draw();
     }
 
     public void Draw()
     {
+        playerDeck.Shuffle();
         InstantiateCardObject(playerDeck.Draw());
         // Draw 호출 되면 InstantiateCardObject 실행
     }
@@ -34,6 +32,7 @@ public class DeckManager : MonoBehaviour
     {
         var cardObject = Instantiate(cardPrefab, this.transform).GetComponent<CardHandler>();
         cardsInHand.Add(cardObject);
+
         cardObject.Init(cardData.power);
         // cardsInHands에 넣고, CardHandler 에서 initialize 실행
     }

@@ -93,6 +93,7 @@ public class EnemyAgent : LivingEntity
         base.OnDamage(damage);
         if (!dead)
         {
+            SoundManager.instance.PlaySound(1);
             foreach (var item in materials)
             {
                 item.material.DOColor(new Color(1, 0, 0), 0.05f).OnComplete(() => item.material.DOColor(new Color(1, 1, 1), 0.05f));

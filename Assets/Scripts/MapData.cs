@@ -9,12 +9,12 @@ public class MapData : MonoBehaviour
     public GameObject enemysParent;
     public List<EnemyAgent> enemyList = new List<EnemyAgent>();
 
-    public Transform enemySpawnPos;
-    public float enemySpawnDelay;
-
     public BossAreaCheck bossAreaCheck;
     public Transform playerCenterPos;
 
+    public Transform enemySpawnPos;
+
+    public float enemySpawnDelay;
     public int enemySpawnCount;
 
     public void GetEnemyList()
@@ -28,6 +28,16 @@ public class MapData : MonoBehaviour
             enemyList.Add(enemys[index]);
 
             enemys[index].onDeath.AddListener(() => enemyList.Remove(enemys[index]));
+        }
+    }
+
+    public void EnemyBalance(int stageNum)
+    {
+        foreach (var item in enemyList)
+        {
+            item.damage = item.damage * Mathf.Pow(1.07f, stageNum - 1);
+
+            item.maxHp = item.maxHp * Mathf.Pow(1.07f, stageNum - 1);
         }
     }
 }
