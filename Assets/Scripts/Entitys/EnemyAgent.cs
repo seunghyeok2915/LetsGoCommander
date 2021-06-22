@@ -7,6 +7,13 @@ using DG.Tweening;
 
 public class EnemyAgent : LivingEntity
 {
+
+    public enum EnemyType
+    {
+        PUNCH,
+        SHOOT
+    }
+
     public enum EnemyState
     {
         IDLE,
@@ -14,6 +21,7 @@ public class EnemyAgent : LivingEntity
         ATTACK,
         DIE
     }
+    public EnemyType type = EnemyType.PUNCH;
     public EnemyState state = EnemyState.IDLE;
 
     public float attackDist = 5.0f; // 공격 사거리
@@ -39,7 +47,7 @@ public class EnemyAgent : LivingEntity
     public float judgeDelay = 0.3f; // 인공지능 판단 딜레이
     private WaitForSeconds ws;
 
-    private Transform playerTr;
+    private LivingEntity player;
     private NavMeshAgent agent;
     private Animator anim;
 
@@ -53,12 +61,12 @@ public class EnemyAgent : LivingEntity
         capsuleCollider = GetComponentInChildren<CapsuleCollider>();
         materials = GetComponentsInChildren<SkinnedMeshRenderer>();
         agent = GetComponent<NavMeshAgent>();
+        anim = GetComponentInChildren<Animator>();
     }
     void Start()
     {
         ws = new WaitForSeconds(judgeDelay);
         onDeath.AddListener(OnDie);
-        anim = GetComponentInChildren<Animator>();
 
         agent.autoBraking = false;
         //목적지에 다가갈 수록 속도 줄이는 옵션
@@ -111,9 +119,9 @@ public class EnemyAgent : LivingEntity
 
             if (FindPlayers())
             {
-                playerTr = soldiers.OrderBy(x => (transform.position - x.transform.position).sqrMagnitude).First().transform;
+                player = soldiers.OrderBy(x => (transform.position - x.transform.position).sqrMagnitude).First();
 
-                float dist = (playerTr.position - transform.position).sqrMagnitude;
+                float dist = (player.transform.position - transform.position).sqrMagnitude;
 
                 if (dist <= attackDist * attackDist && GameManager.bPlayingGame)
                 {
@@ -139,7 +147,7 @@ public class EnemyAgent : LivingEntity
                     Stop();
                     break;
                 case EnemyState.TRACE:
-                    traceTarget = playerTr.position;
+                    traceTarget = player.transform.position;
                     break;
                 case EnemyState.ATTACK:
                     Attack();
@@ -155,17 +163,39 @@ public class EnemyAgent : LivingEntity
     {
         if (nextTimeToAttack <= 0)
         {
-            HitPlayer();
+            switch (type)
+            {
+                case EnemyType.PUNCH:
+                    HitPlayer();
+                    break;
+                case EnemyType.SHOOT:
+                    StartCoroutine(ShootBullet());
+                    break;
+                default:
+                    break;
+            }
             anim.SetTrigger("Attack");
             nextTimeToAttack = attackDelay;
         }
     }
 
-    public void HitPlayer() //anim event
+    public IEnumerator HitPlayer() //anim event
     {
-        var target = playerTr.GetComponentInParent<LivingEntity>();
-        if (target != null)
-            target.OnDamage(damage);
+        yield return new WaitForSeconds(0.2f);
+        if (player != null)
+            player.OnDamage(damage);
+    }
+
+    public IEnumerator ShootBullet()
+    {
+        transform.LookAt(player.transform);
+        yield return new WaitForSeconds(0.2f);
+        SoundManager.instance.PlaySound(2);
+
+        //var bulletCs = Instantiate(bullet, transform.position, Quaternion.identity).GetComponent<Bullet>();
+        var bulletCs = PoolManager.GetItem<Bullet>();
+        bulletCs.InitBullet(transform, player.transform, damage, BulletFrom.Enemy);
+
     }
 
     private void TraceTarget(Vector3 pos)

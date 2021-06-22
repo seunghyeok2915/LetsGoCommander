@@ -18,6 +18,7 @@ public class UIEndPage : MonoBehaviour
     public void SetUIEndPage(GameManager gameManager, bool victoryStatus)
     {
         gameObject.SetActive(true);
+        SoundManager.instance.PlaySound(0);
 
         int getGold = 0;
 
@@ -84,6 +85,6 @@ public class UIEndPage : MonoBehaviour
 
     void CallNewScene()
     {
-        GameManager.LoadScene("MainScene");
+        LoadingSceneManager.LoadScene("MainScene");
     }
 }

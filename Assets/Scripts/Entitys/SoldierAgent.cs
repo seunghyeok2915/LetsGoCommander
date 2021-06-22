@@ -40,6 +40,9 @@ public class SoldierAgent : LivingEntity
         healthTemp = maxHp;
         capsuleCollider = GetComponentInChildren<CapsuleCollider>();
         materials = GetComponentsInChildren<SkinnedMeshRenderer>();
+        anim = GetComponentInChildren<Animator>();
+        navAgent = GetComponent<NavMeshAgent>();
+        onDeath.AddListener(OnDie);
     }
 
     public override void OnEnable()
@@ -53,16 +56,6 @@ public class SoldierAgent : LivingEntity
             item.material.color = new Color(1, 1, 1);
         }
     }
-
-    private void Start()
-    {
-
-
-        onDeath.AddListener(OnDie);
-        anim = GetComponentInChildren<Animator>();
-        navAgent = GetComponent<NavMeshAgent>();
-    }
-
 
     public void InitStatus(int damageLevel, int healthLevel)
     {

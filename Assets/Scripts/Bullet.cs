@@ -67,6 +67,17 @@ public class Bullet : MonoBehaviour
                     }
                     break;
                 case BulletFrom.Enemy:
+                    if (livingEntity.CompareTag("Player"))
+                    {
+                        if (!livingEntity.dead)
+                        {
+                            livingEntity.OnDamage(bulletDamage);
+                            var bloodEffect = PoolManager.GetItem<BloodStainEffect>();
+                            bloodEffect.Init(transform.position, 0.3f);
+                            bloodEffect.transform.eulerAngles = new Vector3(0, Random.Range(0, 360), 0);
+                            SetActiveFalse();
+                        }
+                    }
                     break;
                 default:
                     Debug.LogError("Unknown Type");
