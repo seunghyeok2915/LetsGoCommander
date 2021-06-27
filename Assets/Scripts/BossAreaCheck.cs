@@ -4,7 +4,7 @@ using DG.Tweening;
 
 public class BossAreaCheck : MonoBehaviour
 {
-    bool bInRange = false;
+    private bool bInRange;
 
     public UnityEvent onTriggerEnter;
     private MeshRenderer meshRenderer;

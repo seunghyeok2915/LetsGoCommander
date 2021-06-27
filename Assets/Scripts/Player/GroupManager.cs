@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class GroupManager : MonoBehaviour
@@ -21,7 +22,9 @@ public class GroupManager : MonoBehaviour
     public GroupMovement groupMovement;
     public int currentSoldierCount = 0;
 
-    private List<ChildSlot> childSlots = new List<ChildSlot>(); //자식 슬롯 리스트
+    public ChildSlot centerSlot = null;
+
+    private readonly List<ChildSlot> childSlots = new List<ChildSlot>(); //자식 슬롯 리스트
 
     private void Start()
     {
@@ -32,14 +35,17 @@ public class GroupManager : MonoBehaviour
     private void Update()
     {
         FindEnemys();
+
+        var target = centerSlot.isEmpty ? transform : centerSlot.soldier.transform;
+
+        CameraManager.SetCameraTarget(target);
     }
 
     public bool CheckGameEnd()
     {
         if (currentSoldierCount == 0)
             return true;
-        else
-            return false;
+        return false;
     }
 
     public void DancePlayer()
@@ -50,21 +56,20 @@ public class GroupManager : MonoBehaviour
         }
     }
 
-    void FindEnemys()
+    private void FindEnemys()
     {
         enemys.Clear();
-        var enemyColliders = Physics.OverlapSphere(transform.position, findEnemyRange, enemyLayer);
+        Collider[] results = new Collider[50];
+        var size = Physics.OverlapSphereNonAlloc(transform.position, findEnemyRange, results, enemyLayer);
 
-        int i = 0;
-        while (i < enemyColliders.Length)
+        for (int i = 0; i < size; i++)
         {
-            var livingEntity = enemyColliders[i].GetComponentInParent<LivingEntity>();
+            var livingEntity = results[i].GetComponentInParent<LivingEntity>();
             if (livingEntity != null)
             {
-                if (livingEntity.dead == false)
+                if (livingEntity.Dead == false)
                     enemys.Add(livingEntity);
             }
-            i++;
         }
     }
 
@@ -110,12 +115,12 @@ public class GroupManager : MonoBehaviour
                 break;
         }
         temp.transform.position = transform.position;
-        Debug.Log(transform.position);
+
         PutChild(temp);
         return temp;
     }
 
-    Vector3 GetMakePoint()
+    private Vector3 GetMakePoint()
     {
         var radian = childSlotCount * (360 / (float)shape / layer) * Mathf.Deg2Rad;
         var x = (range * layer) * Mathf.Sin(radian);
@@ -124,13 +129,14 @@ public class GroupManager : MonoBehaviour
         return new Vector3(x, 0, z) + transform.position;
     }
 
-    void MakeEmptySlot()
+    private void MakeEmptySlot()
     {
         var newSlot = new GameObject().AddComponent<ChildSlot>();
 
         if (childSlotCount == -1 && layer == 1) //중앙이라면
         {
             newSlot.Init(this, transform, transform.position, "Center");
+            centerSlot = newSlot;
         }
         else
         {
@@ -147,20 +153,18 @@ public class GroupManager : MonoBehaviour
         }
     }
 
-    public void PutChild(SoldierAgent soldier)
+    private void PutChild(SoldierAgent soldier)
     {
-        foreach (var childSlot in childSlots)
+        while (true)
         {
-            if (childSlot.isEmpty)
+            foreach (var childSlot in childSlots.Where(childSlot => childSlot.isEmpty))
             {
                 childSlot.Mount(soldier);
                 currentSoldierCount++;
                 soldierAgents.Add(soldier);
                 return;
             }
+            MakeEmptySlot();
         }
-        MakeEmptySlot();
-        PutChild(soldier);
     }
-
 }

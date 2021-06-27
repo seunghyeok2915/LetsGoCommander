@@ -1,0 +1,9 @@
+1	1	Killer	kill 50 enemys	50	10
+2	2	Rich	Get 10 golds	10	10
+3	3	master	Clear 1 stages	1	10
+4	1	Killer	kill 100 enemys	100	20
+5	2	Rich	Get 20 golds	20	20
+6	3	master	Clear 2 stages	2	20
+7	1	Killer	kill 200 enemys	200	30
+8	2	Rich	Get 40 golds	40	30
+9	3	master	Clear 4 stages	4	30

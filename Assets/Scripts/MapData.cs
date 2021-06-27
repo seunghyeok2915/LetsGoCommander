@@ -4,22 +4,30 @@ using UnityEngine;
 
 public class MapData : MonoBehaviour
 {
+    [Header("보스스테이지 세팅")]
+    public bool isBoss;
+    public LivingEntity boss;
+
     public Transform playerSpawnPos;
 
-    public GameObject enemysParent;
-    public List<EnemyAgent> enemyList = new List<EnemyAgent>();
-
-    public BossAreaCheck bossAreaCheck;
-    public Transform playerCenterPos;
-
-    public Transform enemySpawnPos;
-
+    [Header("일반스테이지 세팅")]
     public float enemySpawnDelay;
     public int enemySpawnCount;
 
+    public GameObject enemysParent;
+    public List<LivingEntity> enemyList = new List<LivingEntity>();
+
+    public BossAreaCheck bossAreaCheck;
+    public Transform bossAreaPlayerCenterPos;
+
+    public Transform enemySpawnPos;
+
+    private LivingEntity[] enemys;
+
+
     public void GetEnemyList()
     {
-        var enemys = enemysParent.GetComponentsInChildren<EnemyAgent>();
+        enemys = enemysParent.GetComponentsInChildren<LivingEntity>();
 
         for (int i = 0; i < enemys.Length; i++)
         {
@@ -36,8 +44,8 @@ public class MapData : MonoBehaviour
         foreach (var item in enemyList)
         {
             item.damage = item.damage * Mathf.Pow(1.07f, stageNum - 1);
-
             item.maxHp = item.maxHp * Mathf.Pow(1.07f, stageNum - 1);
+            item.curHp = item.maxHp;
         }
     }
 }

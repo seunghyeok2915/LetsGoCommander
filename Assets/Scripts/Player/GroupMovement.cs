@@ -10,14 +10,11 @@ public class GroupMovement : MonoBehaviour
     public float moveSpeed;
 
     public static Vector3 JoyStickDirection;
-    bool bOnBossAttack = false;
+    private bool bOnBossAttack = false;
 
     private void Update()
     {
-        if (bOnBossAttack)
-            JoyStickDirection = Vector3.zero;
-        else
-            JoyStickDirection = new Vector3(joystick.Horizontal, 0, joystick.Vertical);
+        JoyStickDirection = bOnBossAttack ? Vector3.zero : new Vector3(joystick.Horizontal, 0, joystick.Vertical);
 
         Move();
     }
@@ -27,7 +24,7 @@ public class GroupMovement : MonoBehaviour
         bOnBossAttack = true;
     }
 
-    void Move()
+    private void Move()
     {
         if (JoyStickDirection == Vector3.zero) return;
 

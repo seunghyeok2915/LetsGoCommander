@@ -7,25 +7,27 @@ public class LivingEntity : MonoBehaviour, IDamageable
     public float maxHp;
     public float curHp;
 
-    public bool dead { get; private set; }
+    public float damage;
+
+    public bool Dead { get; private set; }
+
+    public Rigidbody rigid;
 
     [HideInInspector]
     public UnityEvent onDeath;
 
     public virtual void OnEnable()
     {
-        dead = false;
-        curHp = maxHp;
-    }
+        if (rigid == null)
+            rigid = GetComponent<Rigidbody>();
 
-    public void InitHP(float maxHp)
-    {
-        this.maxHp = maxHp;
+        Dead = false;
+        curHp = maxHp;
     }
 
     public virtual void OnDamage(float damage) // 피해를 받는 기능
     {
-        if (dead)
+        if (Dead)
             return;
 
         curHp -= damage;
@@ -35,9 +37,7 @@ public class LivingEntity : MonoBehaviour, IDamageable
 
     private void Die() // Die 처리
     {
-        if (onDeath != null)
-            onDeath.Invoke();
-
-        dead = true;
+        onDeath?.Invoke();
+        Dead = true;
     }
 }

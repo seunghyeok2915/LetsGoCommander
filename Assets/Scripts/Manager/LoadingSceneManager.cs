@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 
 using UnityEngine;
@@ -11,7 +12,7 @@ using UnityEngine.SceneManagement;
 public class LoadingSceneManager : MonoBehaviour
 
 {
-    public static string nextScene;
+    private static string nextScene;
 
 
     [SerializeField]
@@ -53,7 +54,7 @@ public class LoadingSceneManager : MonoBehaviour
             else
             {
                 progressBar.fillAmount = Mathf.Lerp(progressBar.fillAmount, 1f, timer);
-                if (progressBar.fillAmount == 1.0f) { op.allowSceneActivation = true; yield break; }
+                if (Math.Abs(progressBar.fillAmount - 1.0f) < 0.1f) { op.allowSceneActivation = true; yield break; }
             }
         }
     }

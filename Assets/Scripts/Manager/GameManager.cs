@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
-using System.IO;
 using UnityEngine.SceneManagement;
 
 public enum UpgradeEnum
@@ -12,29 +11,19 @@ public enum UpgradeEnum
     HEALTH
 }
 
-[System.Serializable]
-public class PlayerData
-{
-    public int currentStage;
-
-    public int gold;
-    public int ruby;
-
-    public int squadLevel;
-    public int damageLevel;
-    public int healthLevel;
-}
-
 public class GameManager : MonoBehaviour
 {
-    public static bool bPlayingGame = false;
+    public static GameManager instance;
+
+    public bool bPlayingGame = false;
 
     public List<MapData> mapList = new List<MapData>();
     public GroupManager groupManager;
 
     public UIHome uiHome;
-    public GameObject uiInGame;
+    public UIInGame uiInGame;
     public UIEndPage uiEndPage;
+    public UIOfflineIncome uIOfflineIncome;
 
     public float judgeDelay = 0.3f; // 판단 딜레이
     private WaitForSeconds ws;
@@ -48,6 +37,19 @@ public class GameManager : MonoBehaviour
     public int damageLevel = 1;
     public int healthLevel = 1;
 
+    public bool sound = true;
+    public bool haptic = true;
+
+    public int outUnixTime;
+    public int questSetTime;
+
+    public int killCount;
+    public int getGoldCount;
+    public int stageClearCount;
+
+    public int[] questIndex;
+    public bool[] hasGetQuestReward;
+
     private int squadUpgradeCost;
     private int damageUpgradeCost;
     private int healthUpgradeCost;
@@ -57,18 +59,28 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
-        LoadData();
+        instance = this;
         mapManager = GetComponent<MapManager>();
         ws = new WaitForSeconds(judgeDelay);
     }
 
     private void Start()
     {
+        DataManager.LoadData();
+
+        int offEarnTime = Utils.GetUnixTime() - outUnixTime;
+        if (offEarnTime > 7200)
+        {
+            uIOfflineIncome.Popup(offEarnTime);
+        }
+
         bPlayingGame = false;
 
         CreateMap();
+
         mapData.GetEnemyList();
         mapData.EnemyBalance(currentStage);
+
 
         UIInit();
         SpawnSoldiers();
@@ -78,13 +90,33 @@ public class GameManager : MonoBehaviour
         SoundManager.instance.SetBGM(0);
     }
 
-    void CreateMap()
+    private void CreateMap()
     {
-        var map = Instantiate(mapList[currentStage - 1], transform.position, Quaternion.identity, transform);
-        mapData = map;
+        try
+        {
+            var map = Instantiate(mapList[currentStage - 1], transform.position, Quaternion.identity, transform);
+            mapData = map;
 
-        mapManager._mapPrefab = map.gameObject;
-        mapManager.GenerateNavmesh();
+            mapManager._mapPrefab = map.gameObject;
+            mapManager.GenerateNavmesh();
+        }
+        catch
+        {
+            currentStage = 1;
+
+            gold = 2;
+            ruby = 10;
+
+            squadLevel = 1;
+            damageLevel = 1;
+            healthLevel = 1;
+
+            var map = Instantiate(mapList[currentStage - 1], transform.position, Quaternion.identity, transform);
+            mapData = map;
+
+            mapManager._mapPrefab = map.gameObject;
+            mapManager.GenerateNavmesh();
+        }
     }
     void SpawnSoldiers()
     {
@@ -111,15 +143,15 @@ public class GameManager : MonoBehaviour
         SetSoldiers();
     }
 
-    void SetSoldiers()
+    private void SetSoldiers()
     {
-        foreach (var item in groupManager.soldierAgents)
+        for (var i = 0; i < groupManager.soldierAgents.Count; i++)
         {
-            item.InitStatus(damageLevel, healthLevel);
+            groupManager.soldierAgents[i].InitStatus(damageLevel, healthLevel);
         }
     }
 
-    public static void LoadScene(string sceneName) // 로드 씬
+    public void LoadScene(string sceneName) // 로드 씬
     {
         LoadingSceneManager.LoadScene(sceneName);
     }
@@ -127,7 +159,13 @@ public class GameManager : MonoBehaviour
     public void PlayGame() //처음 화면에서 클릭 할때 불려진다.
     {
         StartCoroutine(StartGame());
-        mapData.bossAreaCheck.onTriggerEnter.AddListener(() => StartCoroutine(SpawnBoss()));
+
+        uiInGame.Show(mapData.isBoss);
+
+        if (!mapData.isBoss)
+            mapData.bossAreaCheck.onTriggerEnter.AddListener(() => StartCoroutine(SpawnBoss()));
+
+        CameraManager.SetCameraTarget(groupManager.centerSlot.soldier.transform);
 
         DOTween.To(() => CameraManager.transposer.m_FollowOffset, x => CameraManager.transposer.m_FollowOffset = x, new Vector3(0, 15, -10), 2f);
     }
@@ -135,6 +173,9 @@ public class GameManager : MonoBehaviour
     public void GetGold(int gold)
     {
         this.gold += gold;
+        getGoldCount += gold;
+
+        uiHome.SetGold(this.gold, ruby);
     }
 
     private void UIInit()
@@ -148,7 +189,7 @@ public class GameManager : MonoBehaviour
         uiHome.SetUpgradeBtn(healthLevel, GetUpgradeCost(UpgradeEnum.HEALTH), UpgradeEnum.HEALTH);
     }
 
-    public IEnumerator StartGame()
+    private IEnumerator StartGame()
     {
         SoundManager.instance.SetBGM(1);
         StartCoroutine(CheckGameEnd());
@@ -156,15 +197,25 @@ public class GameManager : MonoBehaviour
         bPlayingGame = true;
         while (mapData.enemyList.Count > 0)
         {
-
+            if (mapData.isBoss)
+            {
+                uiInGame.SetBossInfoBar(mapData.boss);
+            }
+            uiInGame.SetEnemyLeftTxt(mapData.enemyList.Count);
             yield return ws;
         }
+        uiInGame.SetEnemyLeftTxt(mapData.enemyList.Count);
 
-        mapData.bossAreaCheck.gameObject.SetActive(true);
+        if (!mapData.isBoss)
+            mapData.bossAreaCheck.gameObject.SetActive(true);
+        else
+            WinGame();
+
+
         yield return ws;
     }
 
-    IEnumerator CheckGameEnd()
+    private IEnumerator CheckGameEnd()
     {
         while (true)
         {
@@ -172,31 +223,22 @@ public class GameManager : MonoBehaviour
             {
                 if (groupManager.CheckGameEnd())
                 {
-                    EndGame();
+                    LoseGame();
                 }
             }
             yield return ws;
         }
     }
 
-    private void EndGame()
+    private IEnumerator SpawnBoss() //BossArea 에 들어오면 불림
     {
-        uiEndPage.SetUIEndPage(this, false);
-        uiInGame.gameObject.SetActive(false);
-
-        DOTween.To(() => CameraManager.transposer.m_FollowOffset, x => CameraManager.transposer.m_FollowOffset = x, new Vector3(0, 4, -10), 2f);
-        bPlayingGame = false;
-    }
-
-    public IEnumerator SpawnBoss() //BossArea 에 들어오면 불림
-    {
-        groupManager.transform.DOMove(mapData.playerCenterPos.position, 1.5f).OnComplete(() => groupManager.groupMovement.SetDirctionZero());
-
+        groupManager.transform.DOMove(mapData.bossAreaPlayerCenterPos.position, 1.5f).OnComplete(() => groupManager.groupMovement.SetDirctionZero());
+        CameraManager.SetCameraTarget(groupManager.transform);
         DOTween.To(() => CameraManager.transposer.m_FollowOffset, x => CameraManager.transposer.m_FollowOffset = x, new Vector3(0, 10, -10), 0.5f);
 
-        uiInGame.SetActive(false); // 조이스틱 끄기
+        uiInGame.gameObject.SetActive(false); // 조이스틱 끄기
         yield return new WaitForSeconds(2f);
-        for (int i = 0; i < mapData.enemySpawnCount; i++) // 적 스폰
+        for (var i = 0; i < mapData.enemySpawnCount; i++) // 적 스폰
         {
             EnemyAgent enemy = null;
 
@@ -222,18 +264,36 @@ public class GameManager : MonoBehaviour
             yield return ws;
         }
 
+        WinGame();
+        yield return ws;
+    }
+
+    private void WinGame()
+    {
         groupManager.DancePlayer();
 
         DOTween.To(() => CameraManager.transposer.m_FollowOffset, x => CameraManager.transposer.m_FollowOffset = x, new Vector3(0, 4, -10), 2f);
 
         uiEndPage.SetUIEndPage(this, true); //End 화면 구현
+        uiInGame.gameObject.SetActive(false);
+
+        stageClearCount++;
+
         bPlayingGame = false;
-        yield return ws;
     }
 
-    public bool UpgradeLevel(UpgradeEnum upgradeEnum)
+    private void LoseGame()
     {
-        int costGold = 0;
+        uiEndPage.SetUIEndPage(this, false);
+        uiInGame.gameObject.SetActive(false);
+
+        DOTween.To(() => CameraManager.transposer.m_FollowOffset, x => CameraManager.transposer.m_FollowOffset = x, new Vector3(0, 4, -10), 2f);
+        bPlayingGame = false;
+    }
+
+    public void UpgradeLevel(UpgradeEnum upgradeEnum)
+    {
+        var costGold = 0;
         costGold = GetUpgradeCost(upgradeEnum);
         if (gold >= costGold)
         {
@@ -262,15 +322,19 @@ public class GameManager : MonoBehaviour
                     break;
             }
             SetSoldiers();
-            SaveData();
-            return true;
+            DataManager.SaveData();
         }
-        else return false;
     }
 
-    public int GetUpgradeCost(UpgradeEnum upgradeEnum)
+    public void Vibrate()
     {
-        int cost = 0;
+        if (haptic)
+            Handheld.Vibrate();
+    }
+
+    private int GetUpgradeCost(UpgradeEnum upgradeEnum)
+    {
+        var cost = 0;
         switch (upgradeEnum)
         {
             case UpgradeEnum.SQUAD:
@@ -289,65 +353,33 @@ public class GameManager : MonoBehaviour
         return cost;
     }
 
-    public void SaveData()
+    public bool TryUseRuby(int cost)
     {
-        PlayerData playerData = new PlayerData
+        if (ruby >= cost)
         {
-            currentStage = this.currentStage,
-            gold = this.gold,
-            ruby = this.ruby,
+            ruby -= cost;
+            uiHome.SetGold(gold, ruby);
+            return true;
+        }
 
-            squadLevel = this.squadLevel,
-            damageLevel = this.damageLevel,
-            healthLevel = this.healthLevel,
-        };
-
-        string str = JsonUtility.ToJson(playerData);
-
-        File.WriteAllText(Application.persistentDataPath + "/PlayerData.json", str);
+        return false;
     }
 
-    void LoadData()
+    private void OnApplicationFocus(bool focusStatus)
     {
-        var path = $"{Application.persistentDataPath}/PlayerData.json";
+        if (!focusStatus)
+            DataManager.SaveData();
+    }
 
-        if (File.Exists(path))
-        {
-            string json = File.ReadAllText(path);
-            PlayerData playerData = JsonUtility.FromJson<PlayerData>(json);
-
-            currentStage = playerData.currentStage;
-
-            gold = playerData.gold;
-            ruby = playerData.ruby;
-
-            squadLevel = playerData.squadLevel;
-            damageLevel = playerData.damageLevel;
-            healthLevel = playerData.healthLevel;
-        }
-        else
-        {
-            PlayerData playerData = new PlayerData
-            {
-                currentStage = 1,
-                gold = 2,
-                ruby = 10,
-
-                squadLevel = 1,
-                damageLevel = 1,
-                healthLevel = 1,
-            };
-
-            string str = JsonUtility.ToJson(playerData);
-
-            File.WriteAllText(Application.persistentDataPath + "/PlayerData.json", str);
-            LoadData();
-        }
+    private void OnApplicationPause(bool pauseStatus)
+    {
+        if (pauseStatus)
+            DataManager.SaveData();
     }
 
     private void OnApplicationQuit()
     {
-        SaveData();
+        DataManager.SaveData();
     }
 
 }

@@ -1,12 +1,13 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using DG.Tweening;
 
 public class UIHome : MonoBehaviour
 {
+    public Image stageImg;
+    public Text stageText;
+
     public Button playerBtn;
-    public GameObject cvsInGame;
 
     public Text goldTxt;
     public Text rubyTxt;
@@ -23,20 +24,60 @@ public class UIHome : MonoBehaviour
     public Text damageCostTxt;
     public Text healthCostTxt;
 
+    public Button settingBtn;
+    public Button questBtn;
+    public Button resetBtn;
+
+    public UISettingPage settingPage;
+    public UIQuestPage questPage;
+    public UIResetPage resetPage;
+
     public void Init(GameManager gameManager)
     {
-        squadBtn.onClick.AddListener(() => gameManager.UpgradeLevel(UpgradeEnum.SQUAD));
-        damageBtn.onClick.AddListener(() => gameManager.UpgradeLevel(UpgradeEnum.DAMAGE));
-        healthBtn.onClick.AddListener(() => gameManager.UpgradeLevel(UpgradeEnum.HEALTH));
+        stageImg.fillAmount = Mathf.Clamp01((float)gameManager.currentStage / 10);
+        stageText.text = string.Format($"Stage 1 - {gameManager.currentStage}");
+
+        squadBtn.onClick.AddListener(() =>
+        {
+            gameManager.UpgradeLevel(UpgradeEnum.SQUAD);
+            GameManager.instance.Vibrate();
+        });
+        damageBtn.onClick.AddListener(() =>
+        {
+            gameManager.UpgradeLevel(UpgradeEnum.DAMAGE);
+            GameManager.instance.Vibrate();
+        });
+        healthBtn.onClick.AddListener(() =>
+        {
+            gameManager.UpgradeLevel(UpgradeEnum.HEALTH);
+            GameManager.instance.Vibrate();
+        });
 
         playerBtn.onClick.AddListener(() =>
         {
             gameManager.PlayGame();
             gameObject.SetActive(false);
-            cvsInGame.SetActive(true);
+            GameManager.instance.Vibrate();
+        });
+
+        settingBtn.onClick.AddListener(() =>
+        {
+            settingPage.gameObject.SetActive(true);
+            GameManager.instance.Vibrate();
+        });
+
+        questBtn.onClick.AddListener(() =>
+        {
+            questPage.Popup();
+            GameManager.instance.Vibrate();
+        });
+
+        resetBtn.onClick.AddListener(() =>
+        {
+            resetPage.Popup();
+            GameManager.instance.Vibrate();
         });
     }
-
 
 
     public void SetGold(int gold, int ruby)

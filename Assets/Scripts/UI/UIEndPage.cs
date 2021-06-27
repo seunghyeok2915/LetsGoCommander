@@ -42,8 +42,9 @@ public class UIEndPage : MonoBehaviour
             gameManager.GetGold(getGold);
             if (victoryStatus)
                 gameManager.currentStage++;
-            gameManager.SaveData();
+            DataManager.SaveData();
             CallNewScene();
+            GameManager.instance.Vibrate();
         });
 
         addClaimBtn.onClick.AddListener(() =>
@@ -51,8 +52,9 @@ public class UIEndPage : MonoBehaviour
             gameManager.GetGold(getGold * 2);
             if (victoryStatus)
                 gameManager.currentStage++;
-            gameManager.SaveData();
+            DataManager.SaveData();
             CallNewScene();
+            GameManager.instance.Vibrate();
         });
     }
 

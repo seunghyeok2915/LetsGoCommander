@@ -8,6 +8,8 @@ using DG.Tweening;
 public class EnemyAgent : LivingEntity
 {
 
+    public GameObject model;
+
     public enum EnemyType
     {
         PUNCH,
@@ -21,12 +23,12 @@ public class EnemyAgent : LivingEntity
         ATTACK,
         DIE
     }
+
     public EnemyType type = EnemyType.PUNCH;
     public EnemyState state = EnemyState.IDLE;
 
     public float attackDist = 5.0f; // 공격 사거리
     public float attackDelay;
-    public float damage;
     private List<LivingEntity> soldiers = new List<LivingEntity>();
     public LayerMask playerLayer;
 
@@ -55,6 +57,7 @@ public class EnemyAgent : LivingEntity
     private CapsuleCollider capsuleCollider;
 
     private float nextTimeToAttack = 0;
+    private static readonly int Death = Animator.StringToHash("Death");
 
     private void Awake()
     {
@@ -75,13 +78,19 @@ public class EnemyAgent : LivingEntity
     public override void OnEnable()
     {
         base.OnEnable();
-
         capsuleCollider.isTrigger = false;
+
+        agent.enabled = false;
         agent.enabled = true;
+
+        agent.speed = traceSpeed;
+
         foreach (var item in materials)
         {
             item.material.color = new Color(1, 1, 1);
         }
+
+        state = EnemyState.IDLE;
 
         StartCoroutine(CheckState()); //상태를 체크하고
         StartCoroutine(DoAction());  //액션을 수행한다
@@ -94,12 +103,14 @@ public class EnemyAgent : LivingEntity
         {
             nextTimeToAttack -= Time.deltaTime;
         }
+        if (model != null)
+            model.transform.localPosition = Vector3.zero;
     }
 
     public override void OnDamage(float damage)
     {
         base.OnDamage(damage);
-        if (!dead)
+        if (!Dead)
         {
             SoundManager.instance.PlaySound(1);
             foreach (var item in materials)
@@ -112,7 +123,7 @@ public class EnemyAgent : LivingEntity
 
     IEnumerator CheckState()
     {
-        while (!dead)
+        while (!Dead)
         {
             if (state == EnemyState.DIE)
                 yield break;
@@ -123,11 +134,11 @@ public class EnemyAgent : LivingEntity
 
                 float dist = (player.transform.position - transform.position).sqrMagnitude;
 
-                if (dist <= attackDist * attackDist && GameManager.bPlayingGame)
+                if (dist <= attackDist * attackDist && GameManager.instance.bPlayingGame)
                 {
                     state = EnemyState.ATTACK;
                 }
-                else if (dist <= traceDist * traceDist && GameManager.bPlayingGame)
+                else if (dist <= traceDist * traceDist && GameManager.instance.bPlayingGame)
                 {
                     state = EnemyState.TRACE;
                 }
@@ -138,7 +149,7 @@ public class EnemyAgent : LivingEntity
 
     IEnumerator DoAction()
     {
-        while (!dead)
+        while (!Dead)
         {
             yield return ws;
             switch (state)
@@ -161,32 +172,31 @@ public class EnemyAgent : LivingEntity
 
     void Attack()
     {
-        if (nextTimeToAttack <= 0)
+        if (!(nextTimeToAttack <= 0)) return;
+
+        switch (type)
         {
-            switch (type)
-            {
-                case EnemyType.PUNCH:
-                    HitPlayer();
-                    break;
-                case EnemyType.SHOOT:
-                    StartCoroutine(ShootBullet());
-                    break;
-                default:
-                    break;
-            }
-            anim.SetTrigger("Attack");
-            nextTimeToAttack = attackDelay;
+            case EnemyType.PUNCH:
+                StartCoroutine(HitPlayer());
+                break;
+            case EnemyType.SHOOT:
+                StartCoroutine(ShootBullet());
+                break;
+            default:
+                break;
         }
+        anim.SetTrigger("Attack");
+        nextTimeToAttack = attackDelay;
     }
 
-    public IEnumerator HitPlayer() //anim event
+    private IEnumerator HitPlayer() //anim event
     {
         yield return new WaitForSeconds(0.2f);
         if (player != null)
             player.OnDamage(damage);
     }
 
-    public IEnumerator ShootBullet()
+    private IEnumerator ShootBullet()
     {
         transform.LookAt(player.transform);
         yield return new WaitForSeconds(0.2f);
@@ -202,11 +212,11 @@ public class EnemyAgent : LivingEntity
     {
         if (agent.isPathStale) return;
         anim.SetBool("isMoving", true);
-        agent.destination = pos;
+        agent.SetDestination(pos);
         agent.isStopped = false;
     }
 
-    public void Stop()
+    private void Stop()
     {
         anim.SetBool("isMoving", false);
         agent.isStopped = true;
@@ -214,36 +224,41 @@ public class EnemyAgent : LivingEntity
     }
 
 
-    bool FindPlayers()
+    private bool FindPlayers()
     {
         soldiers.Clear();
-        var soldierColliders = Physics.OverlapSphere(transform.position, traceDist, playerLayer);
+        Collider[] cols = new Collider[10];
+        var size = Physics.OverlapSphereNonAlloc(transform.position, traceDist, cols, playerLayer);
 
         int i = 0;
-        while (i < soldierColliders.Length)
+        while (i < size)
         {
-            var livingEntity = soldierColliders[i].GetComponentInParent<LivingEntity>();
+            var livingEntity = cols[i].GetComponentInParent<LivingEntity>();
             if (livingEntity != null)
                 soldiers.Add(livingEntity);
             i++;
         }
 
-        if (i > 0)
-            return true;
-        else return false;
+        if (i > 0) return true;
+        return false;
     }
 
-    void OnDie()
+    private void OnDie()
     {
+        GameManager.instance.killCount++;
+
         StartCoroutine(DeathAction());
     }
 
-    IEnumerator DeathAction()
+    private IEnumerator DeathAction()
     {
         state = EnemyState.DIE;
-        anim.SetTrigger("Death");
+        anim.SetTrigger(Death);
+
         capsuleCollider.isTrigger = true;
-        agent.enabled = false;
+        agent.speed = 0;
+        //agent.enabled = false;
+
         foreach (var item in materials)
         {
             item.material.DOColor(new Color(0.2f, 0.2f, 0.2f), 0.2f);

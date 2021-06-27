@@ -23,4 +23,10 @@ public class CameraManager : MonoBehaviour
         yield return new WaitForSeconds(time);
         channelPerlin.m_AmplitudeGain -= intensity;
     }
+
+    public static void SetCameraTarget(Transform target)
+    {
+        cinemachineVirtualCam.Follow = target;
+        cinemachineVirtualCam.LookAt = target;
+    }
 }

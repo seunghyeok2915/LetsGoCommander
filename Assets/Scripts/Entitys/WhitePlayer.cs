@@ -20,7 +20,8 @@ public class WhitePlayer : MonoBehaviour
 
             var effect = PoolManager.GetItem<MagicPoofEffect>();
 
-            effect.Init(new Vector3(transform.position.x, transform.position.y + 1.5f, transform.position.z), 0.5f);
+            var position = transform.position;
+            effect.Init(new Vector3(position.x, position.y + 1.5f, position.z), 0.5f);
             groupManager.MakeSoldier(index, transform);
             gameObject.SetActive(false);
         }

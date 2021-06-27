@@ -63,12 +63,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHp: 10
   curHp: 0
+  rigid: {fileID: 0}
   onDeath:
     m_PersistentCalls:
       m_Calls: []
+  index: 1
   movementSpeed: 5
   rotateSpeed: 10
-  attackRange: 8
+  attackRange: 12
   attackDelay: 0.4
   damage: 10
   enemyLayerMask:
