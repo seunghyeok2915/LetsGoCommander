@@ -29,6 +29,8 @@ public class QuestSlot : MonoBehaviour
 
     public bool hasGetReward;
 
+    public bool canGetReward;
+
     public void SetQusetSlot(Quest quest)
     {
         this.variableIndex = quest.variableIndex;
@@ -40,12 +42,37 @@ public class QuestSlot : MonoBehaviour
 
         this.rewardGold = quest.rewardGold;
 
+        getRewardBtn.onClick.RemoveAllListeners();
         getRewardBtn.onClick.AddListener(OnClickGetBtn);
 
         nameTxt.text = questName;
         definitionTxt.text = questDefinition;
 
         rewardTxt.text = rewardGold.ToString();
+
+        hasGetReward = GameManager.instance.hasGetQuestReward[variableIndex - 1];
+
+        switch (quest.variableIndex)
+        {
+            case 1:
+                status = GameManager.instance.killCount;
+                break;
+            case 2:
+                status = GameManager.instance.getGoldCount;
+                break;
+            case 3:
+                status = GameManager.instance.stageClearCount;
+                break;
+            default:
+                Debug.LogError("Unknown Type");
+                break;
+        }
+
+        if (status >= maxStatus && !hasGetReward)
+        {
+            getRewardBtn.interactable = true;
+            canGetReward = true;
+        }
     }
 
     private void Update()
@@ -77,18 +104,19 @@ public class QuestSlot : MonoBehaviour
         if (status >= maxStatus && !hasGetReward)
         {
             getRewardBtn.interactable = true;
+            canGetReward = true;
         }
         else
         {
             getRewardBtn.interactable = false;
+            canGetReward = false;
         }
 
         if (hasGetReward)
-        {
             getImage.gameObject.SetActive(true);
-        }
         else
             getImage.gameObject.SetActive(false);
+
     }
 
     private void OnClickGetBtn()

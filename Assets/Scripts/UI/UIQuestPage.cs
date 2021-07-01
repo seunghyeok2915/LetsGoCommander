@@ -7,6 +7,8 @@ public class UIQuestPage : MonoBehaviour
     public QuestManager questManager;
     public QuestSlot[] questSlots;
 
+    public GameObject notifIcon;
+
     public Image backPanel;
     public GameObject popUpPanel;
 
@@ -51,6 +53,8 @@ public class UIQuestPage : MonoBehaviour
 
     public void OnClickCloseBtn()
     {
+        SoundManager.instance.PlaySound(6);
+        GameManager.instance.Vibrate();
         popUpPanel.transform.DOScale(new Vector3(0.1f, 0.1f, 0.1f), 0.2f).OnComplete(() => gameObject.SetActive(false));
         backPanel.DOFade(0, 0.2f);
         gameObject.SetActive(false);
@@ -58,15 +62,32 @@ public class UIQuestPage : MonoBehaviour
 
     public void OnClickNewQuestBtn()
     {
+        SoundManager.instance.PlaySound(6);
+        GameManager.instance.Vibrate();
         uIBuyNewQuestsPage.Popup();
         uIBuyNewQuestsPage.buyBtn.onClick.AddListener(SetQusetSlot);
     }
 
-    private void SetQusetSlot()
+    public void SetQusetSlot()
     {
         for (int i = 0; i < 3; i++)
         {
             questSlots[i].SetQusetSlot(questManager.nowQuests[i]);
         }
+    }
+
+    public void CheckNotifi()
+    {
+        SetQusetSlot();
+
+        for (int i = 0; i < 3; i++)
+        {
+            if (questSlots[i].canGetReward)
+            {
+                notifIcon.SetActive(true);
+                return;
+            }
+        }
+        notifIcon.SetActive(false);
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 using UnityEngine.SceneManagement;
+using GooglePlayGames;
 
 public enum UpgradeEnum
 {
@@ -24,6 +25,7 @@ public class GameManager : MonoBehaviour
     public UIInGame uiInGame;
     public UIEndPage uiEndPage;
     public UIOfflineIncome uIOfflineIncome;
+    public UIExitPopupPage uIExitPopupPage;
 
     public float judgeDelay = 0.3f; // 판단 딜레이
     private WaitForSeconds ws;
@@ -50,6 +52,8 @@ public class GameManager : MonoBehaviour
     public int[] questIndex;
     public bool[] hasGetQuestReward;
 
+    public bool adRemoval;
+
     private int squadUpgradeCost;
     private int damageUpgradeCost;
     private int healthUpgradeCost;
@@ -57,15 +61,20 @@ public class GameManager : MonoBehaviour
     private MapData mapData;
     private MapManager mapManager;
 
-    private void Awake()
+    private void Update()
     {
-        instance = this;
-        mapManager = GetComponent<MapManager>();
-        ws = new WaitForSeconds(judgeDelay);
+        if (Input.GetKey(KeyCode.Escape))
+        {
+            uIExitPopupPage.Popup();
+        }
     }
 
     private void Start()
     {
+        instance = this;
+        mapManager = GetComponent<MapManager>();
+        ws = new WaitForSeconds(judgeDelay);
+
         DataManager.LoadData();
 
         int offEarnTime = Utils.GetUnixTime() - outUnixTime;
@@ -88,6 +97,26 @@ public class GameManager : MonoBehaviour
         CameraManager.transposer.m_FollowOffset = new Vector3(0, 7, -7.33f);
 
         SoundManager.instance.SetBGM(0);
+
+        PlayGamesPlatform.Activate();
+        PlayGamesPlatform.DebugLogEnabled = true;
+
+        AddStageLevelLeaderBoard();
+    }
+
+    private void AddStageLevelLeaderBoard()
+    {
+        Social.ReportScore(currentStage, GPGSIds.leaderboard_stagerank, (bool bSuccess) =>
+        {
+            if (bSuccess)
+            {
+                Debug.Log("ReportLeaderBoard Success");
+            }
+            else
+            {
+                Debug.Log("ReportLeaderBoard Fall");
+            }
+        });
     }
 
     private void CreateMap()
@@ -102,14 +131,7 @@ public class GameManager : MonoBehaviour
         }
         catch
         {
-            currentStage = 1;
-
-            gold = 2;
-            ruby = 10;
-
-            squadLevel = 1;
-            damageLevel = 1;
-            healthLevel = 1;
+            currentStage--;
 
             var map = Instantiate(mapList[currentStage - 1], transform.position, Quaternion.identity, transform);
             mapData = map;
@@ -270,6 +292,7 @@ public class GameManager : MonoBehaviour
 
     private void WinGame()
     {
+        groupManager.groupMovement.SetDirctionZero();
         groupManager.DancePlayer();
 
         DOTween.To(() => CameraManager.transposer.m_FollowOffset, x => CameraManager.transposer.m_FollowOffset = x, new Vector3(0, 4, -10), 2f);
@@ -284,6 +307,7 @@ public class GameManager : MonoBehaviour
 
     private void LoseGame()
     {
+        groupManager.groupMovement.SetDirctionZero();
         uiEndPage.SetUIEndPage(this, false);
         uiInGame.gameObject.SetActive(false);
 
@@ -368,17 +392,24 @@ public class GameManager : MonoBehaviour
     private void OnApplicationFocus(bool focusStatus)
     {
         if (!focusStatus)
+        {
+            FirebaseManager.LogEvent("UserLeaveStage", "stage", currentStage);
             DataManager.SaveData();
+        }
     }
 
     private void OnApplicationPause(bool pauseStatus)
     {
         if (pauseStatus)
+        {
+            FirebaseManager.LogEvent("UserLeaveStage", "stage", currentStage);
             DataManager.SaveData();
+        }
     }
 
     private void OnApplicationQuit()
     {
+        FirebaseManager.LogEvent("UserLeaveStage", "stage", currentStage);
         DataManager.SaveData();
     }
 

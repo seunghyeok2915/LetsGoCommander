@@ -16,10 +16,12 @@ public class CameraManager : MonoBehaviour
         transposer = cinemachineVirtualCam.GetCinemachineComponent<CinemachineTransposer>();
     }
 
-    public static IEnumerator ShakeCamera(float intensity, float time)
+    public static IEnumerator ShakeCamera(float intensity, float time, bool isBoss = false)
     {
+
         if (channelPerlin.m_AmplitudeGain < 2)
             channelPerlin.m_AmplitudeGain += intensity;
+
         yield return new WaitForSeconds(time);
         channelPerlin.m_AmplitudeGain -= intensity;
     }

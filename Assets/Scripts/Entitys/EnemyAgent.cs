@@ -78,6 +78,7 @@ public class EnemyAgent : LivingEntity
     public override void OnEnable()
     {
         base.OnEnable();
+        agent.radius = 0.5f;
         capsuleCollider.isTrigger = false;
 
         agent.enabled = false;
@@ -252,6 +253,7 @@ public class EnemyAgent : LivingEntity
 
     private IEnumerator DeathAction()
     {
+        agent.radius = 0;
         state = EnemyState.DIE;
         anim.SetTrigger(Death);
 

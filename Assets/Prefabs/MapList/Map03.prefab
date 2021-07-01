@@ -221,7 +221,7 @@ MonoBehaviour:
   isBoss: 0
   boss: {fileID: 0}
   playerSpawnPos: {fileID: 6237590240300811656}
-  enemySpawnDelay: 0.1
+  enemySpawnDelay: 0.3
   enemySpawnCount: 10
   enemysParent: {fileID: 6237590238487363378}
   enemyList: []
@@ -898,7 +898,7 @@ PrefabInstance:
     - target: {fileID: 8213640248388821115, guid: 614953f692d2f67449b8d3921a8c16b9,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -3.3090694
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 8213640248388821115, guid: 614953f692d2f67449b8d3921a8c16b9,
         type: 3}
@@ -908,7 +908,7 @@ PrefabInstance:
     - target: {fileID: 8213640248388821115, guid: 614953f692d2f67449b8d3921a8c16b9,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 12.838584
+      value: 9.39
       objectReference: {fileID: 0}
     - target: {fileID: 8213640248388821115, guid: 614953f692d2f67449b8d3921a8c16b9,
         type: 3}

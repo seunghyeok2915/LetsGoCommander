@@ -52,7 +52,7 @@ public class QuestManager : MonoBehaviour
             quests.Add(quest);
         }
         //PickRandomQuests();
-        Invoke("LoadQuests", 0.1f);
+        Invoke("LoadQuests", 0.01f);
     }
 
     public void LoadQuests()

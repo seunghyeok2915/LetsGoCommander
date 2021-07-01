@@ -23,7 +23,7 @@ public class Skill01 : MonoBehaviour
     {
         inCircle.transform.localScale = new Vector3(0, 0.01f, 0);
 
-        inCircle.transform.DOScale(new Vector3(1, 1, 1), attackDelay).OnComplete(() =>
+        inCircle.transform.DOScale(new Vector3(1, 0.01f, 1), attackDelay).OnComplete(() =>
         {
             AttackPlayer();
         });
@@ -46,6 +46,8 @@ public class Skill01 : MonoBehaviour
         Vector3 createPos = transform.position;
         createPos.y += 1f;
         effect.Init(createPos, 2f);
+
+        SoundManager.instance.PlaySound(7);
 
         gameObject.SetActive(false);
     }

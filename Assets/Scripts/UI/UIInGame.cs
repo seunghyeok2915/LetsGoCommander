@@ -12,10 +12,12 @@ public class UIInGame : MonoBehaviour
     public Image hpFillbarImage;
 
     public GameObject bossAppearAnimPanel;
+    public GameObject bossFusiousAnimPanel;
 
     public Button closeBtn;
 
     private bool isBoss;
+    private bool furious = false;
 
     private void Start()
     {
@@ -38,6 +40,8 @@ public class UIInGame : MonoBehaviour
             enemyLeftUI.SetActive(true);
             bossInfoUI.SetActive(false);
         }
+
+        furious = false;
     }
 
     public void SetEnemyLeftTxt(int enemyCount)
@@ -51,6 +55,12 @@ public class UIInGame : MonoBehaviour
         hpFillbarImage.fillAmount = Mathf.Clamp01(percent);
         hpPercentTxt.text = string.Format($"{percent * 100:F0}%");
 
+        if (percent < 0.5f && !furious)
+        {
+            StartCoroutine(ShowBossFuriousAnim());
+            furious = true;
+        }
+
     }
 
     private IEnumerator ShowBossAnim()
@@ -60,8 +70,17 @@ public class UIInGame : MonoBehaviour
         bossAppearAnimPanel.SetActive(false);
     }
 
+    private IEnumerator ShowBossFuriousAnim()
+    {
+        bossFusiousAnimPanel.SetActive(true);
+        yield return new WaitForSeconds(2f);
+        bossFusiousAnimPanel.SetActive(false);
+    }
+
     private void OnClickCloseBtn()
     {
+        SoundManager.instance.PlaySound(6);
+        GameManager.instance.Vibrate();
         GameManager.instance.LoadScene("MainScene");
         DataManager.SaveData();
     }

@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "948969262417",
+    "project_id": "letsgocommander-62097",
+    "firebase_url": "https://letsgocommander-62097-default-rtdb.firebaseio.com/",
+    "storage_bucket": "letsgocommander-62097.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:948969262417:android:3548678f82e87c1c87d770",
+        "android_client_info": {
+          "package_name": "com.SeunghyeokCompany.LetsGoCommander"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "948969262417-2boqi9ed6i4j5v8tdrqfl57e4l2mmntn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.SeunghyeokCompany.LetsGoCommander",
+            "certificate_hash": "15d574fa9ceeb9a3086420a399371b1aef13b36c"
+          }
+        },
+        {
+          "client_id": "948969262417-klq9t23g96oifukfpjrcfcee7mhcr2bh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.SeunghyeokCompany.LetsGoCommander",
+            "certificate_hash": "f2035d7b46cf483f1daf5cc8c39d1e8e32b34e83"
+          }
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA5BzUaY2jihBx36jO5SZggHScQA7hcQr0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

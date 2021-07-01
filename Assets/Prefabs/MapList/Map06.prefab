@@ -228,8 +228,8 @@ MonoBehaviour:
   isBoss: 0
   boss: {fileID: 0}
   playerSpawnPos: {fileID: 6237590240300811656}
-  enemySpawnDelay: 0.1
-  enemySpawnCount: 20
+  enemySpawnDelay: 0.2
+  enemySpawnCount: 15
   enemysParent: {fileID: 6237590238487363378}
   enemyList: []
   bossAreaCheck: {fileID: 6237590239786036994}

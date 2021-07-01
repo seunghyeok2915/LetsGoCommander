@@ -33,6 +33,7 @@ public class SoundManager : MonoBehaviour
             audioClipDic.Add(i, audioClips[i].audioClip);
         }
         bgmAudioSource = gameObject.AddComponent<AudioSource>();
+        DontDestroyOnLoad(this);
     }
 
     public void SetBGM(int index)

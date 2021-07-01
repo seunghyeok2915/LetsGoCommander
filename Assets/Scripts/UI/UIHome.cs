@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 using DG.Tweening;
+using UnityEngine.Purchasing;
 
 public class UIHome : MonoBehaviour
 {
@@ -27,6 +29,9 @@ public class UIHome : MonoBehaviour
     public Button settingBtn;
     public Button questBtn;
     public Button resetBtn;
+    public Button leaderBoardBtn;
+    public IAPButton adRemovalIAPBtn;
+    public Button adRemovalBtn;
 
     public UISettingPage settingPage;
     public UIQuestPage questPage;
@@ -41,16 +46,19 @@ public class UIHome : MonoBehaviour
         {
             gameManager.UpgradeLevel(UpgradeEnum.SQUAD);
             GameManager.instance.Vibrate();
+            SoundManager.instance.PlaySound(6);
         });
         damageBtn.onClick.AddListener(() =>
         {
             gameManager.UpgradeLevel(UpgradeEnum.DAMAGE);
             GameManager.instance.Vibrate();
+            SoundManager.instance.PlaySound(6);
         });
         healthBtn.onClick.AddListener(() =>
         {
             gameManager.UpgradeLevel(UpgradeEnum.HEALTH);
             GameManager.instance.Vibrate();
+            SoundManager.instance.PlaySound(6);
         });
 
         playerBtn.onClick.AddListener(() =>
@@ -58,26 +66,63 @@ public class UIHome : MonoBehaviour
             gameManager.PlayGame();
             gameObject.SetActive(false);
             GameManager.instance.Vibrate();
+            SoundManager.instance.PlaySound(6);
         });
 
         settingBtn.onClick.AddListener(() =>
         {
             settingPage.gameObject.SetActive(true);
             GameManager.instance.Vibrate();
+            SoundManager.instance.PlaySound(6);
         });
 
         questBtn.onClick.AddListener(() =>
         {
             questPage.Popup();
             GameManager.instance.Vibrate();
+            SoundManager.instance.PlaySound(6);
         });
 
         resetBtn.onClick.AddListener(() =>
         {
             resetPage.Popup();
             GameManager.instance.Vibrate();
+            SoundManager.instance.PlaySound(6);
         });
+
+        leaderBoardBtn.onClick.AddListener(() =>
+        {
+            Social.ShowLeaderboardUI();
+            GameManager.instance.Vibrate();
+            SoundManager.instance.PlaySound(6);
+        });
+
+        if (gameManager.adRemoval)
+        {
+            adRemovalBtn.interactable = false;
+        }
+
+        StartCoroutine(CheckQuestNoti());
     }
+
+    private IEnumerator CheckQuestNoti()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(1.1f);
+            questPage.CheckNotifi();
+        }
+    }
+
+    public void BuyAdRemoval()
+    {
+        GameManager.instance.adRemoval = true;
+        GameManager.instance.Vibrate();
+        SoundManager.instance.PlaySound(6);
+        DataManager.SaveData();
+        adRemovalBtn.interactable = false;
+    }
+
 
 
     public void SetGold(int gold, int ruby)

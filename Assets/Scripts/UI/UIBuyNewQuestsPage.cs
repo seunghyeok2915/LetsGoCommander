@@ -42,11 +42,15 @@ public class UIBuyNewQuestsPage : MonoBehaviour
         {
             questManager.PickRandomQuests(false);
             gameObject.SetActive(false);
+
+            SoundManager.instance.PlaySound(6);
         }
     }
 
     private void OnClickNoBuyBtn()
     {
         gameObject.SetActive(false);
+
+        SoundManager.instance.PlaySound(6);
     }
 }

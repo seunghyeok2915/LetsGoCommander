@@ -27,10 +27,16 @@ public class PlayerData
 
     public int[] questIndex = new int[3];
     public bool[] hasGetQuestReward = new bool[3];
+
+    public bool adRemoval;
 }
 
 public class DataManager : MonoBehaviour
 {
+    private void Start()
+    {
+        DontDestroyOnLoad(this);
+    }
     public static void SaveData()
     {
         PlayerData playerData = new PlayerData
@@ -55,7 +61,9 @@ public class DataManager : MonoBehaviour
             questSetTime = GameManager.instance.questSetTime,
 
             questIndex = GameManager.instance.questIndex,
-            hasGetQuestReward = GameManager.instance.hasGetQuestReward
+            hasGetQuestReward = GameManager.instance.hasGetQuestReward,
+
+            adRemoval = GameManager.instance.adRemoval
         };
 
         string str = JsonUtility.ToJson(playerData);
@@ -93,6 +101,8 @@ public class DataManager : MonoBehaviour
 
             GameManager.instance.questIndex = playerData.questIndex;
             GameManager.instance.hasGetQuestReward = playerData.hasGetQuestReward;
+
+            GameManager.instance.adRemoval = playerData.adRemoval;
         }
         else
         {
@@ -116,7 +126,9 @@ public class DataManager : MonoBehaviour
                 outUnixTime = Utils.GetUnixTime(),
                 questSetTime = 0,
                 questIndex = new int[3],
-                hasGetQuestReward = new bool[3]
+                hasGetQuestReward = new bool[3],
+
+                adRemoval = false
             };
 
             string str = JsonUtility.ToJson(playerData);
@@ -155,7 +167,9 @@ public class DataManager : MonoBehaviour
             outUnixTime = Utils.GetUnixTime(),
             questSetTime = 0,
             questIndex = new int[3],
-            hasGetQuestReward = new bool[3]
+            hasGetQuestReward = new bool[3],
+
+            adRemoval = false
         };
 
         string str = JsonUtility.ToJson(playerData);

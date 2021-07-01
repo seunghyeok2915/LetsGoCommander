@@ -29,11 +29,15 @@ public class UIResetPage : MonoBehaviour
 
     private void OnClickYesBtn()
     {
+        SoundManager.instance.PlaySound(6);
+        GameManager.instance.Vibrate();
         DataManager.ResetData();
     }
 
     private void OnClickNoBtn()
     {
+        SoundManager.instance.PlaySound(6);
+        GameManager.instance.Vibrate();
         gameObject.SetActive(false);
     }
 }

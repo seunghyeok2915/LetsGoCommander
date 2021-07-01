@@ -42,6 +42,9 @@ public class UIOfflineIncome : MonoBehaviour
 
     public void OnClickClaimBtn(int multiply)
     {
+        SoundManager.instance.PlaySound(6);
+        GameManager.instance.Vibrate();
+
         GameManager.instance.GetGold(gold * multiply);
         popUpPanel.transform.DOScale(new Vector3(0.1f, 0.1f, 0.1f), 0.2f).OnComplete(() => gameObject.SetActive(false));
         backPanel.DOFade(0, 0.2f);

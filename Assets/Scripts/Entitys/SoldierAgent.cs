@@ -176,6 +176,7 @@ public class SoldierAgent : LivingEntity
 
             var muzzleFlashEffect = PoolManager.GetItem<MuzzleFlashEffect>();
             muzzleFlashEffect.Init(firePos.position, 0.1f);
+            muzzleFlashEffect.transform.LookAt(firePos.position);
 
             StartCoroutine(CameraManager.ShakeCamera(0.5f, 0.3f));
 

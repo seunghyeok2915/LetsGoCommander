@@ -13,6 +13,8 @@ public class UISettingPage : MonoBehaviour
     public Text soundTxt;
     public Text hapticTxt;
 
+    public Text appVersionTxt;
+
     public Button closeBtn;
 
     private Sequence seq1;
@@ -39,10 +41,13 @@ public class UISettingPage : MonoBehaviour
 
         soundTxt.text = GameManager.instance.sound ? "ON" : "OFF";
         hapticTxt.text = GameManager.instance.haptic ? "ON" : "OFF";
+
+        appVersionTxt.text = Application.version;
     }
 
     private void OnClickSoundBtn()
     {
+        SoundManager.instance.PlaySound(6);
         GameManager.instance.Vibrate();
 
         GameManager.instance.sound = !GameManager.instance.sound;
@@ -55,6 +60,7 @@ public class UISettingPage : MonoBehaviour
 
     private void OnClickHapticBtn()
     {
+        SoundManager.instance.PlaySound(6);
         GameManager.instance.Vibrate();
 
         GameManager.instance.haptic = !GameManager.instance.haptic;
@@ -65,6 +71,7 @@ public class UISettingPage : MonoBehaviour
 
     private void CallCloseFunc()
     {
+        SoundManager.instance.PlaySound(6);
         GameManager.instance.Vibrate();
         gameObject.SetActive(false);
     }

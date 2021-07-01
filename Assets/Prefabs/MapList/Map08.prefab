@@ -330,7 +330,7 @@ MonoBehaviour:
   boss: {fileID: 0}
   playerSpawnPos: {fileID: 6237590240300811656}
   enemySpawnDelay: 0.01
-  enemySpawnCount: 30
+  enemySpawnCount: 25
   enemysParent: {fileID: 6237590238487363378}
   enemyList: []
   bossAreaCheck: {fileID: 6237590239786036994}
