@@ -31,10 +31,9 @@ public class LoadingSceneManager : MonoBehaviour
         AsyncOperation op = SceneManager.LoadSceneAsync(nextScene);
         op.allowSceneActivation = false;
         float timer = 0.0f;
-        Debug.Log("1");
+
         while (!op.isDone)
         {
-            Debug.Log("2");
             yield return null;
 
             timer += Time.deltaTime;
@@ -42,10 +41,8 @@ public class LoadingSceneManager : MonoBehaviour
             if (op.progress >= 0.9f)
             {
                 progressBar.fillAmount = Mathf.Lerp(progressBar.fillAmount, 1f, timer);
-                Debug.Log("3");
                 if (progressBar.fillAmount > 0.9f)
                 {
-                    Debug.Log("4");
                     op.allowSceneActivation = true;
                     yield break;
                 }
@@ -53,10 +50,8 @@ public class LoadingSceneManager : MonoBehaviour
             else
             {
                 progressBar.fillAmount = Mathf.Lerp(progressBar.fillAmount, 1, timer);
-                Debug.Log("5");
                 if (progressBar.fillAmount >= op.progress)
                 {
-                    Debug.Log("6");
                     timer = 0f;
                 }
             }

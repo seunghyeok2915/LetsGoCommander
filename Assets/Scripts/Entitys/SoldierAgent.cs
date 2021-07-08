@@ -8,33 +8,33 @@ using DG.Tweening;
 
 public class SoldierAgent : LivingEntity
 {
-    public int index;
-
     public float movementSpeed = 5f;
     public float rotateSpeed = 3f;
-
     public float attackRange;
     public float attackDelay;
-    public LayerMask enemyLayerMask;
-    public GameObject bullet;
     public bool bIsAttackRange;
-    public Transform firePos;
 
-
-    public ChildSlot childSlot;
-    private Animator anim;
-    private NavMeshAgent navAgent;
-
-    Vector3 dir = Vector3.zero;
-
-    private float nextTimeToAttack;
-    private LivingEntity targetEntity;
+    public LayerMask enemyLayerMask;
+    public NavMeshAgent navAgent;
+    public Animator anim;
 
     private SkinnedMeshRenderer[] materials;
     private CapsuleCollider capsuleCollider;
 
+    public GameObject bullet;
+    public Transform firePos;
+
+    public ChildSlot childSlot;
+
+    private Vector3 dir = Vector3.zero;
+
+    private float nextTimeToAttack;
+    private LivingEntity targetEntity;
+
+
     private float damageTemp;
     private float healthTemp;
+
     private static readonly int IsShooting = Animator.StringToHash("isShooting");
     private static readonly int Dance = Animator.StringToHash("Dance");
     private static readonly int MoveSpeed = Animator.StringToHash("moveSpeed");
